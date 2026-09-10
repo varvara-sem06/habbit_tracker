@@ -35,7 +35,7 @@ jobs:
 
     env:
       SECRET_KEY : test_secret_key
-      DEBUG = "True"
+      DEBUG: "True"
 
       POSTGRES_DB: habit_db
       POSTGRES_USER: postgres
