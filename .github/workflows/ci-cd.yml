@@ -34,7 +34,7 @@ jobs:
           - 6379:6379
 
     env:
-      SECRET_KEY : test_secret_key
+      SECRET_KEY: test_secret_key
       DEBUG: "True"
 
       POSTGRES_DB: habit_db
@@ -67,3 +67,22 @@ jobs:
 
       - name: Build Docker images
         run: docker compose build
+
+  ssh-test:
+    runs-on: ubuntu-latest
+    needs: tests
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/github_actions
+          chmod 600 ~/.ssh/github_actions
+          ssh-keyscan -H "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Test SSH connection
+        run: |
+          ssh -i ~/.ssh/github_actions \
+            "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" \
+            "docker --version && docker compose version && echo 'SSH connection successful'"
