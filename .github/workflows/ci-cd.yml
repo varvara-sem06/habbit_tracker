@@ -34,7 +34,8 @@ jobs:
           - 6379:6379
 
     env:
-      DEBUG: "True"
+      SECRET_KEY : test_secret_key
+      DEBUG = "True"
 
       POSTGRES_DB: habit_db
       POSTGRES_USER: postgres
