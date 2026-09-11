@@ -3,7 +3,7 @@ name: Django CI/CD
 on:
   push:
     branches:
-      - 'feature/**'
+      - "feature/**"
       - develop
 
   pull_request:
@@ -45,11 +45,9 @@ jobs:
       CELERY_BROKER_URL: redis://localhost:6379/0
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
@@ -75,14 +73,15 @@ jobs:
     steps:
       - name: Configure SSH
         run: |
-          mkdir -p ~/.ssh
-          printf '%s\n' "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/github_actions
-          chmod 600 ~/.ssh/github_actions
-          ssh-keyscan -H "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "${{ secrets.SERVER_SSH_KEY }}" > "$HOME/.ssh/github_actions"
+          chmod 600 "$HOME/.ssh/github_actions"
+          ssh-keyscan -H "${{ secrets.SERVER_HOST }}" >> "$HOME/.ssh/known_hosts"
 
-      - name: Deploy to Yandex Cloud
+      - name: Deploy to server
         run: |
-          ssh -i ~/.ssh/github_actions ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+          ssh -i "$HOME/.ssh/github_actions" \
+            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
             cd ~/habbit_tracker
             git pull origin develop
             docker compose down
